@@ -3,7 +3,9 @@ import {
   ADD_TO_CART_BEGIN,
   ADD_TO_CART_SUCCESS,
   ADD_TO_CART_FAIL,
+  REMOVE_FROM_CART,
 } from '../constants';
+
 const addToCart = (productId, quantity) => async (dispatch, getState) => {
   console.log('In cart actions: productId, quantity', productId, quantity);
   try {
@@ -41,4 +43,17 @@ const addToCart = (productId, quantity) => async (dispatch, getState) => {
   }
 };
 
-export { addToCart };
+const removeFromCart =
+  (productID, quantity, price) => async (dispatch, getState) => {
+    try {
+      dispatch({
+        type: REMOVE_FROM_CART,
+        payload: { productID, quantity, price },
+      });
+      localStorage.setItem('cart', JSON.stringify(getState().cart.cartItems));
+    } catch (err) {
+      throw new Error(err.response.data);
+    }
+  };
+
+export { addToCart, removeFromCart };

@@ -2,7 +2,12 @@ import { Container, Row, Col, Alert, ListGroup, Button } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import CartItemComponent from '../../components/CartItemComponent';
 
-const CartPageComponent = ({ dispatchToCart, cartItems, cartSubtotal }) => {
+const CartPageComponent = ({
+  dispatchToCart,
+  cartItems,
+  cartSubtotal,
+  dispatchCartRemoveHandler,
+}) => {
   const changeCount = (productID, count) => {
     dispatchToCart({ productID, count });
   };
@@ -21,6 +26,7 @@ const CartPageComponent = ({ dispatchToCart, cartItems, cartSubtotal }) => {
                   key={idx}
                   item={item}
                   changeCount={changeCount}
+                  dispatchCartRemoveHandler={dispatchCartRemoveHandler}
                 />
               ))}
             </ListGroup>
@@ -38,7 +44,7 @@ const CartPageComponent = ({ dispatchToCart, cartItems, cartSubtotal }) => {
               Price: <span className='fw-bold'>&#8377;{cartSubtotal}</span>
             </ListGroup.Item>
             <ListGroup.Item>
-              <LinkContainer to='/user/order-details'>
+              <LinkContainer to='/user/cart-details'>
                 <Button type='button' disabled={cartItems.length === 0}>
                   Proceed To Checkout
                 </Button>

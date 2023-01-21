@@ -4,7 +4,10 @@ const CartItemComponent = ({
   item,
   orderCreated = false,
   changeCount = false,
+  dispatchCartRemoveHandler,
 }) => {
+  /*WIll call dispatch here as multiple pages will be accessing this */
+
   return (
     <>
       <ListGroup.Item>
@@ -39,9 +42,16 @@ const CartItemComponent = ({
           </Col>
           <Col md={3}>
             <Button
+              disabled={orderCreated}
               type='button'
               variant='secondary'
-              onClick={() => window.confirm('Are you sure?')}
+              onClick={() => {
+                dispatchCartRemoveHandler(
+                  item.productID,
+                  item.quantity,
+                  item.price
+                );
+              }}
             >
               <i className='bi bi-trash'></i>
             </Button>

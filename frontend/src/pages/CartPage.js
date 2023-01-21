@@ -1,6 +1,6 @@
 import CartPageComponent from './component/CartPageComponent';
 import { useSelector, useDispatch } from 'react-redux';
-import { addToCart } from '../redux/actions/cartActions';
+import { addToCart, removeFromCart } from '../redux/actions/cartActions';
 
 const CartPage = () => {
   const dispatch = useDispatch();
@@ -11,9 +11,16 @@ const CartPage = () => {
     dispatch(addToCart(productID, count));
   };
 
+  const dispatchCartRemoveHandler = async (productID, quantity, price) => {
+    if (window.confirm('Are you sure to remove the product')) {
+      dispatch(removeFromCart(productID, quantity, price));
+    }
+  };
+
   return (
     <CartPageComponent
       dispatchToCart={dispatchToCart}
+      dispatchCartRemoveHandler={dispatchCartRemoveHandler}
       cartItems={cartItems}
       cartSubtotal={cartSubtotal}
     />

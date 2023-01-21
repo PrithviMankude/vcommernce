@@ -2,6 +2,7 @@ import {
   ADD_TO_CART_BEGIN,
   ADD_TO_CART_SUCCESS,
   ADD_TO_CART_FAIL,
+  REMOVE_FROM_CART,
 } from '../constants';
 
 const cartItemsInLocalStorage = localStorage.getItem('cart')
@@ -27,24 +28,7 @@ const initialState = {
   isLoading: false,
   showAlert: false,
   showAlertText: '',
-
-  /*cartItems: cartItemsInLocalStorage,
-  itemsCount: cartItemsInLocalStorage
-    ? cartItemsInLocalStorage.reduce(
-        (quantity, item) => Number(item.quantity) + quantity,
-        0
-      )
-    : 0,
-  cartSubTotal: cartItemsInLocalStorage
-    ? cartItemsInLocalStorage.reduce(
-        (price, item) => price + item.price * item.quantity,
-        0
-      )
-    : 0,
-    */
 };
-
-//console.log('Cart Reducer :', initialState);
 
 const CART_INITIAL_STATE = {
   cartItems: cartItemsInLocalStorage,
@@ -54,7 +38,7 @@ const CART_INITIAL_STATE = {
         0
       )
     : 0,
-  cartSubtotal:cartItemsInLocalStorage
+  cartSubtotal: cartItemsInLocalStorage
     ? cartItemsInLocalStorage.reduce(
         (price, item) => price + item.price * item.quantity,
         0
@@ -66,12 +50,6 @@ const cartReducer = (state = CART_INITIAL_STATE, action) => {
   console.log(state);
   const { type, payload } = action;
   switch (type) {
-    case ADD_TO_CART_BEGIN:
-      return {
-        ...state,
-        isLoading: true,
-      };
-
     case ADD_TO_CART_SUCCESS:
       const productBeingAddedToCart = action.payload;
 
@@ -110,51 +88,16 @@ const cartReducer = (state = CART_INITIAL_STATE, action) => {
       }
 
       return currentState;
-
-    /*
-      const productBeingAddedToCart = payload;
-      const productAlreadyExists = state.cartItems.find(
-        (x) => x.productID === productBeingAddedToCart.productID
-      );
-      const currentState = { ...state };
-      if (productAlreadyExists) {
-        currentState.itemsCount = 0;
-        currentState.cartSubTotal = 0;
-        currentState.cartItems = state.cartItems.map((x) => {
-          if (x.productID === productAlreadyExists.productID) {
-            currentState.itemsCount += Number(productBeingAddedToCart.quantity);
-            const sum =
-              Number(productBeingAddedToCart.quantity) *
-              Number(productBeingAddedToCart.price);
-            currentState.cartSubTotal += sum;
-          } else {
-            currentState.itemsCount = Number(x.quantity);
-            const sum = Number(x.quantity) * Number(x.price);
-            currentState.cartSubTotal += sum;
-          }
-          return x.productID === productAlreadyExists.productID
-            ? productBeingAddedToCart
-            : x;
-        });
-      } else {
-        currentState.itemsCount = Number(productBeingAddedToCart.quantity);
-        const sum =
-          Number(productBeingAddedToCart.quantity) *
-          Number(productBeingAddedToCart.price);
-        currentState.cartSubTotal += sum;
-        currentState.cartItems = [...state.cartItems, productBeingAddedToCart];
-      }
-      currentState.isLoading = false;
-
-      return currentState;
-
-    case ADD_TO_CART_FAIL:
+    case REMOVE_FROM_CART:
       return {
-        isLoading: false,
-        showAlert: true,
-        showAlertText: payload,
+        ...state,
+        cartItems: state.cartItems.filter(
+          (x) => x.productID !== action.payload.productID
+        ),
+        itemsCount: state.itemsCount - action.payload.quantity,
+        cartSubtotal:
+          state.cartSubtotal - action.payload.quantity * action.payload.price,
       };
-      */
 
     default:
       return state;

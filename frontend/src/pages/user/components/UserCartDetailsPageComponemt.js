@@ -7,16 +7,27 @@ import {
   ListGroup,
   Button,
 } from 'react-bootstrap';
-import CartItemComponent from '../../components/CartItemComponent';
+import CartItemComponent from '../../../components/CartItemComponent';
 import { useState } from 'react';
 
-const UserOrderDetailsPage = () => {
+const UserCartDetailsPageComponent = ({
+  cartItems,
+  itemsCount,
+  cartSubtotal,
+  addToCartHandler,
+  removeFromCartHandler,
+}) => {
   const [paymentMethod, setPaymentMethod] = useState('pp');
 
+  const choosePayment = (e) => {
+    setPaymentMethod(e.target.value);
+  };
+
+  console.log('In User cart Details:', cartItems);
   return (
     <Container fluid>
       <Row className='mt-4'>
-        <h1>Order Details</h1>
+        <h1>User Cart Details</h1>
         <Col md={8}>
           <br />
           <Row>
@@ -27,12 +38,8 @@ const UserOrderDetailsPage = () => {
               <b>Phone</b>: 888 777 666
             </Col>
             <Col md={6}>
-              <h2>Payment method...</h2>
-
-              <Form.Select
-                disabled={false}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-              >
+              <h2>Payment method</h2>
+              <Form.Select onChange={choosePayment}>
                 <option value='pp'>PayPal</option>
                 <option value='cod'>
                   Cash On Delivery (delivery may be delayed)
@@ -42,12 +49,13 @@ const UserOrderDetailsPage = () => {
             <Row>
               <Col>
                 <Alert className='mt-3' variant='danger'>
-                  Not delivered
+                  Not delivered. In order to make order, fill out your profile
+                  with correct address, city etc.
                 </Alert>
               </Col>
               <Col>
                 <Alert className='mt-3' variant='success'>
-                  Paid on 2022-10-02
+                  Not paid yet
                 </Alert>
               </Col>
             </Row>
@@ -55,16 +63,12 @@ const UserOrderDetailsPage = () => {
           <br />
           <h2>Order items</h2>
           <ListGroup variant='flush'>
-            {Array.from({ length: 5 }).map((item, idx) => (
+            {cartItems.map((item, idx) => (
               <CartItemComponent
-                item={{
-                  image: { path: '/images/tablets-category.png' },
-                  name: 'Product name',
-                  price: 10,
-                  count: 10,
-                  quantity: 10,
-                }}
+                item={item}
                 key={idx}
+                addToCartHandler={addToCartHandler}
+                removeFromCartHandler={removeFromCartHandler}
               />
             ))}
           </ListGroup>
@@ -75,7 +79,8 @@ const UserOrderDetailsPage = () => {
               <h3>Order summary</h3>
             </ListGroup.Item>
             <ListGroup.Item>
-              Items price (after tax): <span className='fw-bold'>$892</span>
+              Items price (after tax):{' '}
+              <span className='fw-bold'>&#8377;{cartSubtotal}</span>
             </ListGroup.Item>
             <ListGroup.Item>
               Shipping: <span className='fw-bold'>included</span>
@@ -84,7 +89,8 @@ const UserOrderDetailsPage = () => {
               Tax: <span className='fw-bold'>included</span>
             </ListGroup.Item>
             <ListGroup.Item className='text-danger'>
-              Total price: <span className='fw-bold'>$904</span>
+              Total price:{' '}
+              <span className='fw-bold'>&#8377;{cartSubtotal}</span>
             </ListGroup.Item>
             <ListGroup.Item>
               <div className='d-grid gap-2'>
@@ -100,4 +106,4 @@ const UserOrderDetailsPage = () => {
   );
 };
 
-export default UserOrderDetailsPage;
+export default UserCartDetailsPageComponent;

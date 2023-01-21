@@ -1,5 +1,5 @@
 import UserCartDetailsPageComponent from './components/UserCartDetailsPageComponemt';
-
+import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { addToCart, removeFromCart } from '../../redux/actions/cartActions';
 import axios from 'axios';
@@ -18,6 +18,7 @@ const UserCartDetailsPage = () => {
     }
   };
   */
+  const navigate = useNavigate();
 
   const cartItems = useSelector((state) => state.cart.cartItems);
   const itemsCount = useSelector((state) => state.cart.itemsCount);
@@ -27,7 +28,20 @@ const UserCartDetailsPage = () => {
   const getUser = async () => {
     try {
       const { data } = await axios.get('/api/users/profile/' + userInfo._id);
+
       return data;
+    } catch (err) {
+      throw new Error(err.response.data);
+    }
+  };
+
+  const createOrder = async (orderData) => {
+    try {
+      const { data } = await axios.post('/api/orders', { ...orderData });
+      if (data) {
+        navigate('/user/order-details/' + data._id);
+        return data;
+      }
     } catch (err) {
       throw new Error(err.response.data);
     }
@@ -40,6 +54,7 @@ const UserCartDetailsPage = () => {
       cartSubtotal={cartSubtotal}
       userInfo={userInfo}
       getUser={getUser}
+      createOrder={createOrder}
     />
   );
 };

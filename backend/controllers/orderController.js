@@ -26,7 +26,6 @@ const getOrder = async (req, res, next) => {
 
 const createOrder = async (req, res, next) => {
   try {
-    console.log('In createOrder');
     const { orderTotal, cartItems, paymentMethod } = req.body;
     if (!orderTotal || !cartItems || !paymentMethod) {
       return res.status(400).send('All fields are required');
@@ -40,6 +39,7 @@ const createOrder = async (req, res, next) => {
       return Number(item.quantity);
     });
 
+    /* For fetching the sales only */
     const product = await Product.find({ _id: { $in: ids } }).then(
       (products) => {
         products.forEach(function (product, idx) {

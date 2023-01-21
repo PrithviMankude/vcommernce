@@ -18,6 +18,7 @@ const UserCartDetailsPageComponent = ({
   removeFromCartHandler,
   userInfo,
   getUser,
+  createOrder,
 }) => {
   const [paymentMethod, setPaymentMethod] = useState('pp');
   const [buttonDisabled, setButtonDisabled] = useState(false);
@@ -27,7 +28,6 @@ const UserCartDetailsPageComponent = ({
   useEffect(() => {
     getUser()
       .then((data) => {
-        console.log(data);
         if (
           !data.address ||
           !data.city ||
@@ -59,6 +59,28 @@ const UserCartDetailsPageComponent = ({
         )
       );
   }, [userInfo._id]);
+
+  const orderHandler = () => {
+    const orderData = {
+      orderTotal: {
+        itemsCount: itemsCount,
+        cartSubtotal: cartSubtotal,
+      },
+      cartItems: cartItems.map((item) => {
+        return {
+          productID: item.productID,
+          name: item.name,
+          price: item.price,
+          image: { path: item.image ? item.image.path ?? null : null },
+          quantity: item.quantity,
+          count: item.count,
+        };
+      }),
+      paymentMethod: paymentMethod,
+    };
+
+    createOrder(orderData);
+  };
 
   const choosePayment = (e) => {
     setPaymentMethod(e.target.value);
@@ -95,10 +117,6 @@ const UserCartDetailsPageComponent = ({
                     Not Delivered{missingAddress}
                   </Alert>
                 }
-                {/*} <Alert className='mt-3' variant='danger'>
-                  Not delivered. In order to make order, fill out your profile
-                  with correct address, city etc.
-  </Alert> */}
               </Col>
               <Col>
                 <Alert className='mt-3' variant='success'>
@@ -146,8 +164,9 @@ const UserCartDetailsPageComponent = ({
                   variant='danger'
                   type='button'
                   disabled={buttonDisabled}
+                  onClick={orderHandler}
                 >
-                  Pay for the order
+                  Place Order
                 </Button>
               </div>
             </ListGroup.Item>

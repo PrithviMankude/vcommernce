@@ -58,8 +58,10 @@ const UserProfilePage = () => {
     //Delete if no further actions
     if (result) {
       const { success, userUpdated } = result;
+      console.log(result);
     }
     //To do: update here next action, if any
+    return result;
   };
 
   return (

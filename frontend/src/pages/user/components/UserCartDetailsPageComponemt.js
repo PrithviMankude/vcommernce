@@ -8,7 +8,7 @@ import {
   Button,
 } from 'react-bootstrap';
 import CartItemComponent from '../../../components/CartItemComponent';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const UserCartDetailsPageComponent = ({
   cartItems,
@@ -16,14 +16,54 @@ const UserCartDetailsPageComponent = ({
   cartSubtotal,
   addToCartHandler,
   removeFromCartHandler,
+  userInfo,
+  getUser,
 }) => {
   const [paymentMethod, setPaymentMethod] = useState('pp');
+  const [buttonDisabled, setButtonDisabled] = useState(false);
+  const [userAddress, setUserAddress] = useState({});
+  const [missingAddress, setMissingAddress] = useState('');
+
+  useEffect(() => {
+    getUser()
+      .then((data) => {
+        console.log(data);
+        if (
+          !data.address ||
+          !data.city ||
+          !data.country ||
+          !data.zipCode ||
+          !data.state ||
+          !data.phoneNumber
+        ) {
+          setButtonDisabled(true);
+          setMissingAddress(
+            'Products cannot be delivered. In order to fulfil the order Please update your profile with correct address, city etc '
+          );
+        } else {
+          setUserAddress({
+            address: data.address,
+            city: data.city,
+            country: data.county,
+            zipCode: data.zipCode,
+            state: data.state,
+            phoneNumber: data.phoneNumber,
+          });
+          setMissingAddress(false);
+        }
+      })
+      .catch((err) =>
+        console.log(
+          'User Profile fields missing, cant deliver the order.Pl update your profile',
+          err.response.data
+        )
+      );
+  }, [userInfo._id]);
 
   const choosePayment = (e) => {
     setPaymentMethod(e.target.value);
   };
 
-  console.log('In User cart Details:', cartItems);
   return (
     <Container fluid>
       <Row className='mt-4'>
@@ -33,9 +73,11 @@ const UserCartDetailsPageComponent = ({
           <Row>
             <Col md={6}>
               <h2>Shipping</h2>
-              <b>Name</b>: John Doe <br />
-              <b>Address</b>: 8739 Mayflower St. Los Angeles, CA 90063 <br />
-              <b>Phone</b>: 888 777 666
+              <b>Name </b>: {userInfo.name} {userInfo.lastName} <br />
+              <b>Address</b>: {userAddress.address} {userAddress.city}{' '}
+              {userAddress.state} {userAddress.country} {userAddress.zipCode}
+              <br />
+              <b>Phone</b>: {userAddress.phoneNumber}
             </Col>
             <Col md={6}>
               <h2>Payment method</h2>
@@ -48,10 +90,15 @@ const UserCartDetailsPageComponent = ({
             </Col>
             <Row>
               <Col>
-                <Alert className='mt-3' variant='danger'>
+                {
+                  <Alert className='mt-3' variant='danger'>
+                    Not Delivered{missingAddress}
+                  </Alert>
+                }
+                {/*} <Alert className='mt-3' variant='danger'>
                   Not delivered. In order to make order, fill out your profile
                   with correct address, city etc.
-                </Alert>
+  </Alert> */}
               </Col>
               <Col>
                 <Alert className='mt-3' variant='success'>
@@ -94,7 +141,12 @@ const UserCartDetailsPageComponent = ({
             </ListGroup.Item>
             <ListGroup.Item>
               <div className='d-grid gap-2'>
-                <Button size='lg' variant='danger' type='button'>
+                <Button
+                  size='lg'
+                  variant='danger'
+                  type='button'
+                  disabled={buttonDisabled}
+                >
                   Pay for the order
                 </Button>
               </div>

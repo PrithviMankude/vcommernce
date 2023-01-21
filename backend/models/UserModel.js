@@ -30,7 +30,7 @@ const userSchema = mongoose.Schema(
     city: {
       type: String,
     },
-    StaticRange: {
+    state: {
       type: String,
     },
     password: {

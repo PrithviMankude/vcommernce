@@ -11,7 +11,12 @@ import CartItemComponent from '../../../components/CartItemComponent';
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
-const UserOrderDetailsPageComponent = ({ userInfo, getUser, getOrder }) => {
+const UserOrderDetailsPageComponent = ({
+  userInfo,
+  getUser,
+  getOrder,
+  loadScript,
+}) => {
   //This step is for order which is placed, so user can only view it and not edit
   const [userAddress, setUserAddress] = useState({});
   const [paymentMethod, setPaymentMethod] = useState('');
@@ -67,6 +72,33 @@ const UserOrderDetailsPageComponent = ({ userInfo, getUser, getOrder }) => {
 
       .catch((err) => console.log(err));
   }, []);
+
+  //Preparing for order if customer chooses Online payment
+  const orderHandler = () => {
+    console.log('Order handler called');
+    setButtonDisabled(true);
+    if (paymentMethod === 'pp') {
+      setOrderButtonMessage(
+        'Please continue to pay by clicking the below buttons'
+      );
+      if (!isPaid) {
+        console.log('Paypal..');
+        loadScript({
+          'client-id':
+            'AXVFBO9l-fG5xmDsKKVDPxqJQJzDaHICLhrPYOOTmJucGe4u_ncy9RgjQ4S1C51s16Ak0uAc8p_TBCAv',
+        })
+          .then((paypal) => {
+            console.log(paypal);
+          })
+          .catch((err) => console.log(err.response.data));
+        //To Do:Load paypal scripts and do further
+      }
+    } else {
+      setOrderButtonMessage(
+        'Your order was placed successfully and will be processed. Thank You'
+      );
+    }
+  };
 
   return (
     <Container fluid>
@@ -149,6 +181,7 @@ const UserOrderDetailsPageComponent = ({ userInfo, getUser, getOrder }) => {
                   size='lg'
                   variant='danger'
                   type='button'
+                  onClick={orderHandler}
                   disabled={buttonDisabled}
                 >
                   {orderButtonMessage}

@@ -1,6 +1,7 @@
 import UserOrderDetailsPageComponent from './components/UserOrderDetailsPageComponent';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
+import { loadScript } from '@paypal/paypal-js';
 
 const UserOrderDetailsPage = () => {
   const userInfo = useSelector((state) => state.user.userInfo);
@@ -33,6 +34,7 @@ const UserOrderDetailsPage = () => {
       userInfo={userInfo}
       getUser={getUser}
       getOrder={getOrder}
+      loadScript={loadScript}
     />
   );
 };

@@ -8,14 +8,15 @@ import {
   Button,
 } from 'react-bootstrap';
 import CartItemComponent from '../../../components/CartItemComponent';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 
 const UserOrderDetailsPageComponent = ({
   userInfo,
   getUser,
   getOrder,
-  loadScript,
+  loadPaypalScript,
+  stripeCheckOut,
 }) => {
   //This step is for order which is placed, so user can only view it and not edit
   const [userAddress, setUserAddress] = useState({});
@@ -26,13 +27,15 @@ const UserOrderDetailsPageComponent = ({
   const [cartSubtotal, setCartSubtotal] = useState(0);
   const [isDelivered, setIsDelivered] = useState(false);
   const [buttonDisabled, setButtonDisabled] = useState(false);
+  const [showPayByCardButton, setShowPayByCardButton] = useState(false);
 
   const { id } = useParams();
+  const paypalContainer = useRef();
+  console.log('Fetching the Id', id);
 
   useEffect(() => {
     getUser()
       .then((data) => {
-        console.log(data);
         setUserAddress({
           address: data.address,
           city: data.city,
@@ -82,22 +85,22 @@ const UserOrderDetailsPageComponent = ({
         'Please continue to pay by clicking the below buttons'
       );
       if (!isPaid) {
-        console.log('Paypal..');
-        loadScript({
-          'client-id':
-            'AXVFBO9l-fG5xmDsKKVDPxqJQJzDaHICLhrPYOOTmJucGe4u_ncy9RgjQ4S1C51s16Ak0uAc8p_TBCAv',
-        })
-          .then((paypal) => {
-            console.log(paypal);
-          })
-          .catch((err) => console.log(err.response.data));
-        //To Do:Load paypal scripts and do further
+        //loadPaypalScript(cartSubtotal, cartItems);
+        //stripeCheckOut(cartSubtotal, cartItems);
+        setShowPayByCardButton(true);
       }
     } else {
       setOrderButtonMessage(
         'Your order was placed successfully and will be processed. Thank You'
       );
     }
+  };
+
+  const updateStateAfterOrder = (paidAt) => {
+    setOrderButtonMessage('Thank you for your payment');
+    setIsPaid(paidAt);
+    setButtonDisabled(true);
+    setShowPayByCardButton(false);
   };
 
   return (
@@ -186,6 +189,31 @@ const UserOrderDetailsPageComponent = ({
                 >
                   {orderButtonMessage}
                 </Button>
+                {showPayByCardButton && (
+                  <Button
+                    variant='primary'
+                    className='mt-3'
+                    size='lg'
+                    onClick={() => {
+                      console.log('OrderId is:', id);
+                      stripeCheckOut(
+                        cartSubtotal,
+                        cartItems,
+                        id,
+                        updateStateAfterOrder
+                      );
+                    }}
+                  >
+                    Pay By Card{' '}
+                  </Button>
+                )}
+              </div>
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <div
+                  ref={paypalContainer}
+                  id='paypal-container-element'
+                  className='mt-3'
+                ></div>
               </div>
             </ListGroup.Item>
           </ListGroup>

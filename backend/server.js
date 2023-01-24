@@ -11,9 +11,11 @@ app.use(fileUpload());
 app.use(cookieParser());
 
 app.use('/api', apiRoutes);
-
 app.get('/', (req, res) => {
-  res.json({ msg: 'API Running...' });
+  console.log(req.query);
+  const stripeState = req.query.success;
+  res.send(stripeState);
+  //res.json({ msg: 'API Running...' });
 });
 
 //Mongo Connection

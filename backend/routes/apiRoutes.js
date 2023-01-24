@@ -6,6 +6,9 @@ const productRoutes = require('./productRoutes');
 const categoryRoutes = require('./categoryRoutes');
 const userRoutes = require('./userRoutes');
 const orderRoutes = require('./orderRoutes');
+const paymentRoutes = require('./payment');
+
+console.log('In API routes server file');
 
 app.get('/get-token', (req, res) => {
   try {
@@ -20,6 +23,7 @@ app.get('/get-token', (req, res) => {
 });
 
 app.get('/logout', (req, res) => {
+  console.log('Logout server called');
   return res
     .clearCookie('access_token')
     .status(200)
@@ -30,5 +34,10 @@ app.use('/products', productRoutes);
 app.use('/categories', categoryRoutes);
 app.use('/users', userRoutes);
 app.use('/orders', orderRoutes);
+app.use('/payments', paymentRoutes);
+
+app.get('/', (req, res) => {
+  res.send('In /api route');
+});
 
 module.exports = app;

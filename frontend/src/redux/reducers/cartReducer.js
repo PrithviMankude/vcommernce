@@ -47,7 +47,6 @@ const CART_INITIAL_STATE = {
 };
 
 const cartReducer = (state = CART_INITIAL_STATE, action) => {
-  console.log(state);
   const { type, payload } = action;
   switch (type) {
     case ADD_TO_CART_SUCCESS:

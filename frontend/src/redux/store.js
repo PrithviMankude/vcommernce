@@ -11,25 +11,19 @@ import { combineReducers } from '@reduxjs/toolkit';
 
 import { userReducer } from './reducers/userReducer';
 import { cartReducer } from './reducers/cartReducer';
-import { deleteThis } from './reducers/delete';
+import { categoryReducer } from './reducers/categoryReducer';
 
 const reducer = combineReducers({
-  delete: deleteThis,
   user: userReducer,
   cart: cartReducer,
+  category: categoryReducer,
 });
 
 const cartItemsInLocalStorage = localStorage.getItem('cart')
   ? JSON.parse(localStorage.getItem('cart'))
   : [];
 
-const initialState = {
-  cart: {
-    //cartItems: cartItemsInLocalStorage,
-    itemsCount: 5,
-    cartSubTotal: 5,
-  },
-};
+const initialState = {};
 
 const middleware = [thunk];
 const store = configureStore(

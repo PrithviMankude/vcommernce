@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Nav,
   Navbar,
@@ -17,6 +17,7 @@ import { Link } from 'react-router-dom';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from '../redux/actions/userActions';
+import { getCategories } from '../redux/actions/categoriesActions';
 
 const HeaderComponent = () => {
   return <>{CollapsibleExample()}</>;
@@ -24,8 +25,15 @@ const HeaderComponent = () => {
 
 function CollapsibleExample() {
   const dispatch = useDispatch();
+
+  
+  useEffect(() => {
+    dispatch(getCategories());
+  }, []);
+
   const { userInfo } = useSelector((state) => state.user);
   const itemsCount = useSelector((state) => state.cart.itemsCount);
+  //const categories = useSelector((state) => state.category.categories);
 
   return (
     <Navbar collapseOnSelect expand='lg' bg='dark' variant='dark'>

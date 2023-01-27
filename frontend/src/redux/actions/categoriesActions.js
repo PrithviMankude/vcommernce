@@ -1,4 +1,9 @@
-import { GET_CATEGORIES, SAVE_ATTR } from '../constants';
+import {
+  GET_CATEGORIES,
+  SAVE_ATTR,
+  INSERT_CATEGORY,
+  DELETE_CATEGORY,
+} from '../constants';
 import axios from 'axios';
 
 const getCategories = () => async (dispatch) => {
@@ -26,4 +31,30 @@ const saveAttributesToCategory =
     }
   };
 
-export { getCategories, saveAttributesToCategory };
+const newCategory = (category) => async (dispatch, getState) => {
+  const cat = getState().category.categories;
+
+  const { data } = await axios.post('/api/categories', { category });
+  console.log(data.categoryCreated);
+  if (data.categoryCreated) {
+    dispatch({
+      type: INSERT_CATEGORY,
+      payload: [...cat, data.categoryCreated],
+    });
+  }
+};
+
+const deleteCategory = (category) => async (dispatch, getState) => {
+  const cat = getState().category.categories;
+  const categories = cat.filter((item) => item.name !== category);
+  const { data } = await axios.delete(
+    '/api/categories/' + encodeURIComponent(category)
+  );
+  if (data.categoryDeleted) {
+    dispatch({
+      type: DELETE_CATEGORY,
+      payload: [...categories],
+    });
+  }
+};
+export { getCategories, saveAttributesToCategory, newCategory, deleteCategory };

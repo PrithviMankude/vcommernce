@@ -15,6 +15,10 @@ const CreateProductPageComponent = ({
   createProductApiRequest,
   uploadImagesApiRequest,
   uploadImagesCloudinaryApiRequest,
+  categories,
+  reduxDispatch,
+  newCategory,
+  deleteCategory,
 }) => {
   const [validated, setValidated] = useState(false);
   const [attributesTable, setAttributesTable] = useState([]);
@@ -24,6 +28,7 @@ const CreateProductPageComponent = ({
     message: '',
     error: '',
   });
+  const [categoryChoosen, setCategoryChoosen] = useState('Choose category');
 
   const navigate = useNavigate();
 
@@ -59,6 +64,7 @@ const CreateProductPageComponent = ({
         })
         .then((data) => {
           setIsCreating('Product is being created...');
+
           setTimeout(() => {
             setIsCreating('');
             if (data.message === 'Product Created') {
@@ -76,6 +82,25 @@ const CreateProductPageComponent = ({
 
   const uploadHandler = (images) => {
     setImages(images);
+  };
+
+  const newCategoryHandler = (e) => {
+    if (e.keyCode && e.keyCode === 13 && e.target.value) {
+      reduxDispatch(newCategory(e.target.value));
+      //for some reason its not updating so using a timeout
+      setTimeout(() => {
+        let element = document.getElementById('cats');
+        element.value = e.target.value;
+        setCategoryChoosen(e.target.value);
+        e.target.value = '';
+      }, 300);
+    }
+  };
+
+  const deleteCategoryHandler = () => {
+    let element = document.getElementById('cats');
+    reduxDispatch(deleteCategory(element.value));
+    setCategoryChoosen('Choose category');
   };
 
   return (
@@ -117,17 +142,21 @@ const CreateProductPageComponent = ({
             <Form.Group className='mb-3' controlId='formBasicCategory'>
               <Form.Label>
                 Category
-                <CloseButton />(<small>remove selected</small>)
+                <CloseButton onClick={deleteCategoryHandler} />(
+                <small>remove selected</small>)
               </Form.Label>
               <Form.Select
                 required
+                id='cats'
                 name='category'
                 aria-label='Default select example'
               >
-                <option value=''>Choose category</option>
-                <option value='1'>Laptops</option>
-                <option value='2'>TV</option>
-                <option value='3'>Games</option>
+                <option value='Choose category'>Choose category</option>
+                {categories.map((category, idx) => (
+                  <option key={idx} value={category.name}>
+                    {category.name}
+                  </option>
+                ))}
               </Form.Select>
             </Form.Group>
 
@@ -135,7 +164,11 @@ const CreateProductPageComponent = ({
               <Form.Label>
                 Or create a new category (e.g. Computers/Laptops/Intel){' '}
               </Form.Label>
-              <Form.Control name='newCategory' type='text' />
+              <Form.Control
+                onKeyUp={newCategoryHandler}
+                name='newCategory'
+                type='text'
+              />
             </Form.Group>
 
             <Row className='mt-5'>
@@ -193,7 +226,7 @@ const CreateProductPageComponent = ({
                 <Form.Group className='mb-3' controlId='formBasicNewAttribute'>
                   <Form.Label>Create new attribute</Form.Label>
                   <Form.Control
-                    disabled={false}
+                    disabled={categoryChoosen === 'Choose category'}
                     placeholder='first choose or create category'
                     name='newAttrValue'
                     type='text'
@@ -207,7 +240,7 @@ const CreateProductPageComponent = ({
                 >
                   <Form.Label>Attribute value</Form.Label>
                   <Form.Control
-                    disabled={false}
+                    disabled={categoryChoosen === 'Choose category'}
                     placeholder='first choose or create category'
                     required={true}
                     name='newAttrValue'

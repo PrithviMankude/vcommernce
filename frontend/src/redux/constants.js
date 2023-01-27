@@ -33,3 +33,6 @@ export const GET_CATEGORIES = 'GET_CATEGORIES';
 
 //Save Attributes after creating
 export const SAVE_ATTR = 'SAVE_ATTR';
+
+export const INSERT_CATEGORY = 'INSERT_CATEGORY';
+export const DELETE_CATEGORY = 'DELETE_CATEGORY';

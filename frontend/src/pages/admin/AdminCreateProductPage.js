@@ -1,5 +1,10 @@
 import CreateProductPageComponent from './components/CreateProductPageComponent';
 import axios from 'axios';
+import {
+  newCategory,
+  deleteCategory,
+} from '../../redux/actions/categoriesActions';
+import { useSelector, useDispatch } from 'react-redux';
 
 const createProduct = async (formInputs) => {
   const { data } = await axios.post('/api/products/admin', { ...formInputs });
@@ -41,11 +46,17 @@ const uploadImagesCloudinary = async (images, productId) => {
 };
 
 const AdminCreateProductPage = () => {
+  const { categories } = useSelector((state) => state.category);
+  const dispatch = useDispatch();
   return (
     <CreateProductPageComponent
       createProductApiRequest={createProduct}
       uploadImagesApiRequest={upLoadImage}
       uploadImagesCloudinaryApiRequest={uploadImagesCloudinary}
+      deleteCategory={deleteCategory}
+      categories={categories}
+      reduxDispatch={dispatch}
+      newCategory={newCategory}
     />
   );
 };

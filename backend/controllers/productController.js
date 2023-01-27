@@ -253,6 +253,17 @@ const adminUpdateProduct = async (req, res, next) => {
 };
 
 const adminUpload = async (req, res, next) => {
+  if (req.query.cloudinary === 'true') {
+    try {
+      let product = await Product.findById(req.query.productId).orFail();
+      product.images.push({ path: req.body.url });
+      await product.save();
+    } catch (err) {
+      next(err);
+    }
+
+    return;
+  }
   try {
     const uploadDirectory = path.resolve(
       __dirname,
@@ -305,8 +316,22 @@ const adminUpload = async (req, res, next) => {
 };
 
 const adminDeleteProductImage = async (req, res, next) => {
+  const imagePath = decodeURIComponent(req.params.imagePath);
+  if (req.query.cloudinary === 'true') {
+    try {
+      await Product.findOneAndUpdate(
+        { _id: req.params.productId },
+        { $pull: { images: { path: imagePath } } }
+      ).orFail();
+
+      return res.end();
+    } catch (err) {
+      next(err);
+    }
+    return;
+  }
+
   try {
-    const imagePath = decodeURIComponent(req.params.imagePath);
     const finalPath = path.resolve('../frontend/public') + imagePath;
 
     fs.unlink(finalPath, (err) => {

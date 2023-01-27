@@ -30,3 +30,6 @@ export const REMOVE_FROM_CART = 'REMOVE_FROM_CART';
 
 //Categories
 export const GET_CATEGORIES = 'GET_CATEGORIES';
+
+//Save Attributes after creating
+export const SAVE_ATTR = 'SAVE_ATTR';

@@ -1,6 +1,7 @@
 import EditProductPageComponent from './components/EditProductPageComponent';
 import axios from 'axios';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { saveAttributesToCategory } from '../../redux/actions/categoriesActions';
 
 const fetchProduct = async (productId) => {
   try {
@@ -26,12 +27,15 @@ const updateProduct = async (productId, formInputs) => {
 
 const AdminEditProductPage = () => {
   const { categories } = useSelector((state) => state.category);
+  const reduxDispatch = useDispatch();
 
   return (
     <EditProductPageComponent
       categories={categories}
       fetchProduct={fetchProduct}
       updateProduct={updateProduct}
+      saveAttributeToCatDoc={saveAttributesToCategory}
+      reduxDispatch={reduxDispatch}
     />
   );
 };

@@ -29,6 +29,22 @@ const AdminEditProductPage = () => {
   const { categories } = useSelector((state) => state.category);
   const reduxDispatch = useDispatch();
 
+  const imageDeleteHandler = async (imagePath, productId) => {
+    let encoded = encodeURIComponent(imagePath);
+    await axios.delete(`/api/products/admin/image/${encoded}/${productId}`);
+  };
+  const uploadImageHandler = async (images, productId) => {
+    const formData = new FormData();
+    Array.from(images).forEach((image) => {
+      formData.append('images', image);
+    });
+    console.log('FormData: ', formData);
+    await axios.post(
+      '/api/products/admin/upload?productId=' + productId,
+      formData
+    );
+  };
+
   return (
     <EditProductPageComponent
       categories={categories}
@@ -36,6 +52,8 @@ const AdminEditProductPage = () => {
       updateProduct={updateProduct}
       saveAttributeToCatDoc={saveAttributesToCategory}
       reduxDispatch={reduxDispatch}
+      imageDeleteHandler={imageDeleteHandler}
+      uploadHandler={uploadImageHandler}
     />
   );
 };

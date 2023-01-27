@@ -28,6 +28,8 @@ const EditProductPageComponent = ({
   updateProductApiRequest,
   saveAttributeToCatDoc,
   reduxDispatch,
+  imageDeleteHandler,
+  uploadHandler,
 }) => {
   const [validated, setValidated] = useState(false);
   const [product, setProduct] = useState({});
@@ -40,6 +42,9 @@ const EditProductPageComponent = ({
   const [categoryChoosen, setCategoryChoosen] = useState('Choose category');
   const [newAttrKey, setNewAttrKey] = useState(false);
   const [newAttrValue, setNewAttrValue] = useState(false);
+  const [imageRemoved, setImageRemoved] = useState(false);
+  const [isUploading, setIsUploading] = useState('');
+  const [imageUploaded, setImageUploaded] = useState(false);
 
   const attrVal = useRef(null);
   const attrKey = useRef(null);
@@ -73,7 +78,7 @@ const EditProductPageComponent = ({
     fetchProduct(id)
       .then((product) => setProduct(product))
       .catch((er) => console.log(er));
-  }, [id]);
+  }, [id, imageRemoved, imageUploaded]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -400,11 +405,37 @@ const EditProductPageComponent = ({
                         src={image.path ?? null}
                         fluid
                       />
-                      <i style={onHover} className='bi bi-x text-danger'></i>
+                      <i
+                        style={onHover}
+                        className='bi bi-x text-danger'
+                        onClick={() =>
+                          imageDeleteHandler(image.path, id).then((data) =>
+                            setImageRemoved(!imageRemoved)
+                          )
+                        }
+                      ></i>
                     </Col>
                   ))}
               </Row>
-              <Form.Control required type='file' multiple />
+              <Form.Control
+                onChange={(e) => {
+                  setIsUploading('Upload file is in progress');
+                  uploadHandler(e.target.files, id)
+                    .then((data) => {
+                      setIsUploading('Upload files completed');
+                      setImageUploaded(!imageUploaded);
+                    })
+                    .catch((err) =>
+                      setIsUploading(
+                        err.response.data.message
+                          ? err.response.data.message
+                          : err.response.data
+                      )
+                    );
+                }}
+                type='file'
+                multiple
+              />
             </Form.Group>
             <Button variant='primary' type='submit'>
               UPDATE

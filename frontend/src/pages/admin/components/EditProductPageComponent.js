@@ -51,6 +51,9 @@ const EditProductPageComponent = ({
   const createNewAttrKey = useRef(null);
   const createNewAttrVal = useRef(null);
 
+  const { id } = useParams();
+  const navigate = useNavigate();
+
   const setValuesForAttrFromDbSelectForm = (e) => {
     if (e.target.value !== 'Choose attribute') {
       var selectedAttr = attributesFromDb.find(
@@ -69,10 +72,6 @@ const EditProductPageComponent = ({
       }
     }
   };
-
-  const { id } = useParams();
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchProduct(id)

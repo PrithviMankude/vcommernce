@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-bootstrap';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 const CreateProductPageComponent = ({
   createProductApiRequest,
@@ -29,8 +29,11 @@ const CreateProductPageComponent = ({
     error: '',
   });
   const [categoryChoosen, setCategoryChoosen] = useState('Choose category');
+  const [attributesFromDb, setAttributesFromDb] = useState([]); // for select lists
 
   const navigate = useNavigate();
+  const attrVal = useRef(null);
+  const attrKey = useRef(null);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -103,6 +106,71 @@ const CreateProductPageComponent = ({
     setCategoryChoosen('Choose category');
   };
 
+  const deleteAttribute = (key) => {
+    setAttributesTable((table) => table.filter((item) => item.key !== key));
+  };
+
+  const changeCategory = (e) => {
+    const highLevelCategory = e.target.value.split('/')[0];
+    const highLevelCategoryAllData = categories.find(
+      (cat) => cat.name === highLevelCategory
+    );
+    if (highLevelCategoryAllData && highLevelCategoryAllData.attrs) {
+      setAttributesFromDb(highLevelCategoryAllData.attrs);
+    } else {
+      setAttributesFromDb([]);
+    }
+    setCategoryChoosen(e.target.value);
+  };
+
+  //To show the attribute values on selection of att key
+  const setValuesForAttrFromDbSelectForm = (e) => {
+    if (e.target.value !== 'Choose attribute') {
+      var selectedAttr = attributesFromDb.find(
+        (item) => item.key === e.target.value
+      );
+      let valuesForAttrKeys = attrVal.current;
+      if (selectedAttr && selectedAttr.value.length > 0) {
+        while (valuesForAttrKeys.options.length) {
+          valuesForAttrKeys.remove(0);
+        }
+        valuesForAttrKeys.options.add(new Option('Choose attribute value'));
+        selectedAttr.value.map((item) => {
+          valuesForAttrKeys.add(new Option(item));
+          return '';
+        });
+      }
+    }
+  };
+
+  //To set the attr values selected in the table
+  const setAttributesTableWrapper = (key, val) => {
+    setAttributesTable((attr) => {
+      if (attr.length !== 0) {
+        var keyExistsInOldTable = false;
+        let modifiedTable = attr.map((item) => {
+          if (item.key === key) {
+            keyExistsInOldTable = true;
+            item.value = val;
+            return item;
+          } else {
+            return item;
+          }
+        });
+        if (keyExistsInOldTable) return [...modifiedTable];
+        else return [...modifiedTable, { key: key, value: val }];
+      } else {
+        return [{ key: key, value: val }];
+      }
+    });
+  };
+
+  const attributeValueSelected = (e) => {
+    if (e.target.value !== 'Choose attribute value') {
+      setAttributesTableWrapper(attrKey.current.value, e.target.value);
+    }
+  };
+
   return (
     <Container>
       <Row className='justify-content-md-center mt-5'>
@@ -150,6 +218,7 @@ const CreateProductPageComponent = ({
                 id='cats'
                 name='category'
                 aria-label='Default select example'
+                onChange={(e) => changeCategory(e)}
               >
                 <option value='Choose category'>Choose category</option>
                 {categories.map((category, idx) => (
@@ -171,54 +240,71 @@ const CreateProductPageComponent = ({
               />
             </Form.Group>
 
-            <Row className='mt-5'>
-              <Col md={6}>
-                <Form.Group className='mb-3' controlId='formBasicAttributes'>
-                  <Form.Label>Choose atrribute and set value</Form.Label>
-                  <Form.Select
-                    name='atrrKey'
-                    aria-label='Default select example'
+            {attributesFromDb.length > 0 && (
+              <Row className='mt-5'>
+                <Col md={6}>
+                  <Form.Group className='mb-3' controlId='formBasicAttributes'>
+                    <Form.Label>Choose atrribute and set value</Form.Label>
+                    <Form.Select
+                      name='atrrKey'
+                      aria-label='Default select example'
+                      ref={attrKey}
+                      onChange={(e) => setValuesForAttrFromDbSelectForm(e)}
+                    >
+                      <option>Choose attribute</option>
+
+                      {attributesFromDb.map((item, idx) => (
+                        <option key={idx} value={item.key}>
+                          {item.key}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group
+                    className='mb-3'
+                    controlId='formBasicAttributeValue'
                   >
-                    <option>Choose attribute</option>
-                    <option value='red'>color</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group
-                  className='mb-3'
-                  controlId='formBasicAttributeValue'
-                >
-                  <Form.Label>Attribute value</Form.Label>
-                  <Form.Select
-                    name='atrrVal'
-                    aria-label='Default select example'
-                  >
-                    <option>Choose attribute value</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-            </Row>
+                    <Form.Label>Attribute value</Form.Label>
+                    <Form.Select
+                      name='atrrVal'
+                      aria-label='Default select example'
+                      ref={attrVal}
+                      onChange={(e) => attributeValueSelected(e)}
+                    >
+                      <option>Choose attribute value</option>
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+              </Row>
+            )}
 
             <Row>
-              <Table hover>
-                <thead>
-                  <tr>
-                    <th>Attribute</th>
-                    <th>Value</th>
-                    <th>Delete</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>attr key</td>
-                    <td>attr value</td>
-                    <td>
-                      <CloseButton />
-                    </td>
-                  </tr>
-                </tbody>
-              </Table>
+              {attributesTable.length > 0 && (
+                <Table hover>
+                  <thead>
+                    <tr>
+                      <th>Attribute</th>
+                      <th>Value</th>
+                      <th>Delete</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {attributesTable.map((item, idx) => (
+                      <tr key={idx}>
+                        <td>{item.key}</td>
+                        <td>{item.value}</td>
+                        <td>
+                          <CloseButton
+                            onClick={() => deleteAttribute(item.key)}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              )}
             </Row>
 
             <Row>

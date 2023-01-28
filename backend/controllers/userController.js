@@ -245,7 +245,7 @@ const writeReview = async (req, res, next) => {
     await session.commitTransaction();
     session.endSession();
 
-    res.send('Review created and updated to prodcuct successfully');
+    res.send('Review created and updated to product successfully');
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
@@ -256,7 +256,7 @@ const writeReview = async (req, res, next) => {
 const getUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id)
-      .select('name lastName email, isAdmin')
+      .select('name lastName email isAdmin')
       .orFail();
     return res.status(200).send(user);
   } catch (err) {
@@ -272,7 +272,7 @@ const updateUser = async (req, res, next) => {
     user.name = name || user.name;
     user.lastName = lastName || user.lastName;
     user.email = email || user.email;
-    user.isAdmin = isAdmin || user.isAdmin;
+    user.isAdmin = isAdmin;
 
     await user.save();
     res.send('User Updated');

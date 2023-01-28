@@ -3,6 +3,7 @@ import axios from 'axios';
 import {
   newCategory,
   deleteCategory,
+  saveAttributesToCategory,
 } from '../../redux/actions/categoriesActions';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -57,6 +58,7 @@ const AdminCreateProductPage = () => {
       categories={categories}
       reduxDispatch={dispatch}
       newCategory={newCategory}
+      saveAttributeToCatDoc={saveAttributesToCategory}
     />
   );
 };

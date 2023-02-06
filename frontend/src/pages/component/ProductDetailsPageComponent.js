@@ -12,7 +12,7 @@ import { Rating } from 'react-simple-star-rating';
 import AddedToCartMessageComponent from '../../components/AddedToCartMessageComponent';
 
 import ImageZoom from 'js-image-zoom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 
 const ProductDetailsPageComponent = ({
@@ -28,6 +28,16 @@ const ProductDetailsPageComponent = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [productReviewed, setProductReviewed] = useState(false);
+
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    if (productReviewed) {
+      setTimeout(() => {
+        messagesEndRef.current.scrollIntoView({ align: false });
+      }, 200);
+    }
+  }, [productReviewed]);
 
   useEffect(() => {
     getProductDetails(id)
@@ -179,6 +189,8 @@ const ProductDetailsPageComponent = ({
                           {review.comment}
                         </ListGroup.Item>
                       ))}
+
+                    <div ref={messagesEndRef} />
                   </ListGroup>
                 </Col>
               </Row>

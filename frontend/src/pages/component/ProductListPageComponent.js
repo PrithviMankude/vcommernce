@@ -8,19 +8,30 @@ import RatingFilterComponent from '../../components/filterQueryResultOptions/Rat
 import CategoryFilterComponent from '../../components/filterQueryResultOptions/CategoryFilterComponent';
 import AttributesFilterComponent from '../../components/filterQueryResultOptions/AttributesFilterComponent';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 
 const ProductListPageComponent = ({ getProducts, categories }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [attrFilter, setAttrFilter] = useState([]);
-  const [attrsFromFilter, setAttrsFromFilter] = useState([]);
+  const [attrFilter, setAttrFilter] = useState([]); //collect category attr from db and show on page
+  const [attrsFromFilter, setAttrsFromFilter] = useState([]); //collect user filters for category attr
   const [showResetFiltersButtons, setShowResetFiltersButtons] = useState(false);
 
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState({}); //collect all filters
   const [price, setPrice] = useState(500);
+  const [ratingsFromFilter, setRatingsFromFilter] = useState({});
+  const [categoriesFromFilter, setCategoriesFromFilter] = useState({});
+  const [sortOption, setSortOption] = useState('');
+  const [paginationLinksNumber, setPaginationLinksNumber] = useState(null);
+  const [pageNum, setPageNum] = useState(null);
+
   const { categoryName } = useParams() || '';
+  const { pageNumParam } = useParams() || '1';
+  const { searchQuery } = useParams() || '';
+
+  const location = useLocation(); //To read the path to show the category panel only on /product-list page
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (categoryName) {
@@ -38,22 +49,49 @@ const ProductListPageComponent = ({ getProducts, categories }) => {
     }
   }, [categoryName, categories]);
 
+  //To show attributes for selected categories once the user selects a category
   useEffect(() => {
-    getProducts()
+    if (Object.entries(categoriesFromFilter).length > 0) {
+      //reset and build anew to flush out the old attr values which may be from other category
+      setAttrFilter([]);
+      var cat = [];
+      var count;
+      //Object entries = category and isChecked bool
+      Object.entries(categoriesFromFilter).forEach(([category, checked]) => {
+        if (checked) {
+          var name = category.split('/')[0];
+          cat.push(name);
+          count = cat.filter((x) => x === name).length;
+          if (count === 1) {
+            var index = categories.findIndex((item) => item.name === name);
+            setAttrFilter((attrs) => [...attrs, ...categories[index].attrs]);
+          }
+        }
+      });
+    }
+  }, [categoriesFromFilter, categories]);
+
+  useEffect(() => {
+    getProducts(categoryName, pageNumParam, searchQuery, filters, sortOption)
       .then((products) => {
         setProducts(products.products);
+        setPaginationLinksNumber(products.paginationLinksNumber);
+        setPageNum(products.pageNum);
         setLoading(false);
       })
       .catch((err) => {
         console.log(err);
         setError(true);
       });
-  }, [filters]);
+  }, [categoryName, pageNumParam, searchQuery, filters, sortOption]);
 
   const handleFilters = () => {
+    navigate(location.pathname.replace(/\/[0-9]+$/, '')); //just to remove the page num on clicking filter
     setShowResetFiltersButtons(true);
     setFilters({
       price: price,
+      category: categoriesFromFilter,
+      rating: ratingsFromFilter,
       attrs: attrsFromFilter,
     });
   };
@@ -69,15 +107,30 @@ const ProductListPageComponent = ({ getProducts, categories }) => {
         <Col md={3}>
           <ListGroup varient='flush'>
             <ListGroup.Item className='mb-3 mt-3'>
-              {<SortOptionsComponent />}
+              {<SortOptionsComponent setSortOption={setSortOption} />}
             </ListGroup.Item>
             <ListGroup.Item>
               {' '}
               FILTER: <br />
               {<PriceFilterComponent price={price} setPrice={setPrice} />}
             </ListGroup.Item>
-            <ListGroup.Item>{<RatingFilterComponent />}</ListGroup.Item>
-            <ListGroup.Item>{<CategoryFilterComponent />}</ListGroup.Item>
+            <ListGroup.Item>
+              {
+                <RatingFilterComponent
+                  setRatingsFromFilter={setRatingsFromFilter}
+                />
+              }
+            </ListGroup.Item>
+            {!location.pathname.match(/\/category/) && (
+              <ListGroup.Item>
+                {
+                  <CategoryFilterComponent
+                    setCategoriesFromFilter={setCategoriesFromFilter}
+                  />
+                }
+              </ListGroup.Item>
+            )}
+
             <ListGroup.Item>
               {
                 <AttributesFilterComponent
@@ -117,8 +170,14 @@ const ProductListPageComponent = ({ getProducts, categories }) => {
               />
             ))
           )}
-
-          <PaginationComponent />
+          {paginationLinksNumber > 1 ? (
+            <PaginationComponent
+              categoryName={categoryName}
+              searchQuery={searchQuery}
+              paginationLinksNumber={paginationLinksNumber}
+              pageNum={pageNum}
+            />
+          ) : null}
         </Col>
       </Row>
     </Container>

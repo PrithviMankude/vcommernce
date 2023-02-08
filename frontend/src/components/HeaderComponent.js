@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Nav,
   Navbar,
@@ -13,7 +13,7 @@ import {
 import Badge from 'react-bootstrap/Badge';
 
 import { LinkContainer } from 'react-router-bootstrap';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from '../redux/actions/userActions';
@@ -26,14 +26,44 @@ const HeaderComponent = () => {
 function CollapsibleExample() {
   const dispatch = useDispatch();
 
-  
   useEffect(() => {
     dispatch(getCategories());
   }, []);
 
   const { userInfo } = useSelector((state) => state.user);
   const itemsCount = useSelector((state) => state.cart.itemsCount);
-  //const categories = useSelector((state) => state.category.categories);
+  const { categories } = useSelector((state) => state.category);
+
+  const navigate = useNavigate();
+
+  const [searchCategoryToggle, setSearchCategoryToggle] =
+    useState('All Categories');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const submitHandler = (e) => {
+    if (e.keyCode && e.keyCode !== 13) return;
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      //Category is selected
+      if (searchCategoryToggle === 'All Categories') {
+        navigate(`/product-list/search/${searchQuery}`);
+      } else {
+        navigate(
+          `/product-list/category/${searchCategoryToggle.replaceAll(
+            '/',
+            ','
+          )}/search/${searchQuery}`
+        );
+      }
+    } else if (searchCategoryToggle !== 'All Categories') {
+      //Search query is empty but a category selected
+      navigate(
+        `/product-list/category/${searchCategoryToggle.replaceAll('/', ',')}`
+      );
+    } else {
+      navigate('/product-list');
+    }
+  };
 
   return (
     <Navbar collapseOnSelect expand='lg' bg='dark' variant='dark'>
@@ -45,9 +75,32 @@ function CollapsibleExample() {
         <Navbar.Collapse id='responsive-navbar-nav'>
           <Nav className='me-auto'>
             <InputGroup>
-              {BasicButtonExample()}
-              <Form.Control type='text' placeholder='Search...' />
-              <Button variant='warning'>
+              <DropdownButton
+                id='dropdown-basic-button'
+                title={searchCategoryToggle}
+              >
+                <Dropdown.Item
+                  onClick={() => setSearchCategoryToggle('All Categories')}
+                >
+                  All Categories
+                </Dropdown.Item>
+
+                {categories.map((category, id) => (
+                  <Dropdown.Item
+                    key={id}
+                    onClick={() => setSearchCategoryToggle(category.name)}
+                  >
+                    {category.name}
+                  </Dropdown.Item>
+                ))}
+              </DropdownButton>
+              <Form.Control
+                onKeyUp={submitHandler}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                type='text'
+                placeholder='Search...'
+              />
+              <Button onClick={submitHandler} variant='warning'>
                 <i className='bi bi-search'></i>
               </Button>
             </InputGroup>
@@ -113,21 +166,5 @@ function CollapsibleExample() {
     </Navbar>
   );
 }
-
-function BasicButtonExample() {
-  return (
-    <DropdownButton id='dropdown-basic-button' title='All'>
-      <Dropdown.Item>Electronics</Dropdown.Item>
-      <Dropdown.Item>Mobiles</Dropdown.Item>
-      <Dropdown.Item>Books</Dropdown.Item>
-      <Dropdown.Item>Toys</Dropdown.Item>
-      <Dropdown.Item>Fashion</Dropdown.Item>
-      <Dropdown.Item>Grocery</Dropdown.Item>
-      <Dropdown.Item>Health</Dropdown.Item>
-    </DropdownButton>
-  );
-}
-
-//export default BasicButtonExample;
 
 export default HeaderComponent;
